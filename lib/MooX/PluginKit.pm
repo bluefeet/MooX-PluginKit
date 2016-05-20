@@ -95,7 +95,7 @@ their way into the appropriate classes.
 L<Starch> is the inspiration for this module.  It has a home-grown plugin
 system very similar, but inferior, to PluginKit.  Starch has complex plugins
 which alter the behavior of various systems (classes) within Starch.  For
-a simple example, the L<Starch::Plugin::Trace> injects C<around()> modifiers
+a simple example, L<Starch::Plugin::Trace> injects C<around()> modifiers
 within 3 different classes at object construction time.  And all a user need
 to do is:
 
