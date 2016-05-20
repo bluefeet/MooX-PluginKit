@@ -1,5 +1,16 @@
 package MooX::PluginKit::ConsumerBase;
 
+=head1 NAME
+
+MooX::PluginKit::ConsumerBase - Parent class for PluginKit consumers.
+
+=head2 DESCRIPTION
+
+This module is a total hack to get around
+L<MooX::PluginKit/Cleanly Alter Constructor>.
+
+=cut
+
 use Moo::Object qw();
 
 use strictures 2;
@@ -21,3 +32,9 @@ sub BUILDARGS {
 }
 
 1;
+__END__
+
+=head1 AUTHORS AND LICENSE
+
+See L<MooX::PluginKit/AUTHOR> and L<MooX::PluginKit/LICENSE>.
+

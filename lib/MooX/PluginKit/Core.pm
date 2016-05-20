@@ -1,5 +1,20 @@
 package MooX::PluginKit::Core;
 
+=head1 NAME
+
+MooX::PluginKit::Core - The PluginKit internal guts.
+
+=head2 DESCRIPTION
+
+This module tracks metadata about consumers and plugins as well as
+providing much of the underlying logic behind the other PluginKit
+modules.
+
+Currently this module is not documented because it is not intended
+to be used directly.  This may change.
+
+=cut
+
 use Carp qw( croak );
 use Moo::Role qw();
 use Module::Runtime qw( require_module is_module_name );
@@ -11,6 +26,7 @@ use Exporter qw( import );
 
 our @EXPORT = qw(
   init_plugin
+  is_plugin
   resolve_plugin
   does_plugin_apply
   find_applicable_plugins
@@ -20,6 +36,7 @@ our @EXPORT = qw(
   set_plugin_includes
   get_plugin_includes
   init_consumer
+  is_consumer
   get_consumer_moo_extends
   get_consumer_moo_with
   get_consumer_moo_has
@@ -34,6 +51,11 @@ sub init_plugin {
   my ($plugin_name) = @_;
   my $plugin = $plugins{$plugin_name} = {};
   return;
+}
+
+sub is_plugin {
+  my ($plugin_name) = @_;
+  return $plugins{$plugin_name} ? 1 : 0;
 }
 
 sub resolve_plugin {
@@ -180,6 +202,11 @@ sub init_consumer {
   return;
 }
 
+sub is_consumer {
+  my ($consumer_name) = @_;
+  return $consumers{$consumer_name} ? 1 : 0;
+}
+
 sub get_consumer_moo_extends {
   my ($consumer_name) = @_;
   my $consumer = $consumers{$consumer_name};
@@ -226,3 +253,9 @@ sub get_consumer_namespace {
 }
 
 1;
+__END__
+
+=head1 AUTHORS AND LICENSE
+
+See L<MooX::PluginKit/AUTHOR> and L<MooX::PluginKit/LICENSE>.
+
