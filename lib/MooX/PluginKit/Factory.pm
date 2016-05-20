@@ -6,14 +6,14 @@ MooX::PluginKit::Factory - Dynamically apply plugins to classes at runtime.
 
 =head1 SYNOPSIS
 
-  use MooX::PluginKit::Factory;
-  
-  my $kit = MooX::PluginKit::Factory->new(
-    plugins => [...],
-    namespace => ...,
-  );
-  
-  my $object = $kit->class_new('Some::Class', %args);
+    use MooX::PluginKit::Factory;
+    
+    my $kit = MooX::PluginKit::Factory->new(
+        plugins => [...],
+        namespace => ...,
+    );
+    
+    my $object = $kit->class_new('Some::Class', %args);
 
 =head1 DESCRIPTION
 
@@ -42,9 +42,9 @@ An array ref of plugin names (relative or absolute).
 =cut
 
 has plugins => (
-  is      => 'ro',
-  isa     => ArrayRef[ NonEmptySimpleStr ],
-  default => sub{ [] },
+    is      => 'ro',
+    isa     => ArrayRef[ NonEmptySimpleStr ],
+    default => sub{ [] },
 );
 
 =head2 namespace
@@ -54,8 +54,8 @@ The namespace to resolve relative plugin names to.
 =cut
 
 has namespace => (
-  is  => 'ro',
-  isa => NonEmptySimpleStr,
+    is  => 'ro',
+    isa => NonEmptySimpleStr,
 );
 
 =head1 ATTRIBUTES
@@ -67,23 +67,23 @@ L</plugins> with all relative plugin names resolved.
 =cut
 
 has resolved_plugins => (
-  is       => 'lazy',
-  init_arg => undef,
+    is       => 'lazy',
+    init_arg => undef,
 );
 sub _build_resolved_plugins {
-  my ($self) = @_;
+    my ($self) = @_;
 
-  return [
-    map { resolve_plugin( $_, $self->namespace() ) }
-    @{ $self->plugins() }
-  ];
+    return [
+        map { resolve_plugin( $_, $self->namespace() ) }
+        @{ $self->plugins() }
+    ];
 }
 
 =head1 METHODS
 
 =head2 build_class
 
-  my $new_class = $kit->build_class( $class );
+    my $new_class = $kit->build_class( $class );
 
 Creates a new class with all applicable L</plugins> applied to it
 and returns the new class name.
@@ -91,17 +91,17 @@ and returns the new class name.
 =cut
 
 sub build_class {
-  my ($self, $base_class) = @_;
+    my ($self, $base_class) = @_;
 
-  return build_class_with_plugins(
-    $base_class,
-    @{ $self->resolved_plugins() },
-  );
+    return build_class_with_plugins(
+        $base_class,
+        @{ $self->resolved_plugins() },
+    );
 }
 
 =head2 class_new
 
-  my $object = $kit->class_new( $class, %args );
+    my $object = $kit->class_new( $class, %args );
 
 Calls L</build_class> and then creates an object of that class.
 If the class to be built is a plugin consumer then
@@ -111,17 +111,17 @@ to this factory.
 =cut
 
 sub class_new {
-  my $self = shift;
-  my $base_class = shift;
+    my $self = shift;
+    my $base_class = shift;
 
-  my $class = $self->build_class( $base_class );
-  my $args = $class->BUILDARGS( @_ );
+    my $class = $self->build_class( $base_class );
+    my $args = $class->BUILDARGS( @_ );
 
-  if (is_consumer $class) {
-    $args->{plugin_factory} ||= $self;
-  }
+    if (is_consumer $class) {
+        $args->{plugin_factory} ||= $self;
+    }
 
-  return $class->new( $args );
+    return $class->new( $args );
 }
 
 1;

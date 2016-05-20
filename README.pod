@@ -52,34 +52,34 @@ Its really a lot of mess when a feature is implemented by, for example,
 both a request and response plugin.  If you forget one, the whole thing
 breaks.  Here's a fake example of how things currently look:
 
-  use Catalyst (
-    SomeContextPlugin
-  );
-  use CatalystX::RoleApplicator;
-  __PACKAGE__->apply_request_class_roles(
-    SomeRequestPlugin
-  );
-  __PACKAGE__->apply_response_class_roles(
-    SomeResponsePlugin
-  );
-  # Note, there is also apply_engine_class_roles, apply_dispatcher_class_roles
-  # and apply_stats_class_roles.
+    use Catalyst (
+        SomeContextPlugin
+    );
+    use CatalystX::RoleApplicator;
+    __PACKAGE__->apply_request_class_roles(
+        SomeRequestPlugin
+    );
+    __PACKAGE__->apply_response_class_roles(
+        SomeResponsePlugin
+    );
+    # Note, there is also apply_engine_class_roles, apply_dispatcher_class_roles
+    # and apply_stats_class_roles.
 
 Oh my!  Let's say we start off by using a PluginKit plugin's ability to
 declare which classes they belong to.  Then we could just do this:
 
-  use Catalyst (
-    SomeContextPlugin
-    SomeRequestPlugin
-    SomeResponsePlugin
-  );
+    use Catalyst (
+        SomeContextPlugin
+        SomeRequestPlugin
+        SomeResponsePlugin
+    );
 
 And then one step further if those three plugins, when used together, comprised
 a single feature then we could just:
 
-  use Catalyst (
-    SomePlugin
-  );
+    use Catalyst (
+        SomePlugin
+    );
 
 If Catalyst used PluginKit then all the user would have to do is declare that
 they use the root plugin and the rest of the plugins would automatically find
@@ -94,7 +94,7 @@ a simple example, L<Starch::Plugin::Trace> injects C<around()> modifiers
 within 3 different classes at object construction time.  And all a user need
 to do is:
 
-  my $starch = Starch->new( plugins=>['::Trace'] );
+    my $starch = Starch->new( plugins=>['::Trace'] );
 
 Without a plugin system to hide away these complexities the user would have
 been exposed to implementation details and would leave gaping holes for
@@ -107,7 +107,7 @@ But, uh, what if you want the C<::PSGI> but don't need the C<Test::>.  What
 if you don't want the C<::Mechanize::> and want just C<LWP::UserAgent::PSGI>?
 Wouldn't it be nice if you could just do:
 
-  my $ua = LWP::UserAgent->new( plugins=>['::PSGI', '::Test'] );
+    my $ua = LWP::UserAgent->new( plugins=>['::PSGI', '::Test'] );
 
 PluginKit would make this super simple to support.  Also there is a god awful
 number CPAN module subclasses and subclasses of those subclasses on
@@ -120,8 +120,8 @@ times.
 
 The most minimal plugin is a L<Moo::Role>:
 
-  package MyApp::Plugin::Foo;
-  use Moo::Role;
+    package MyApp::Plugin::Foo;
+    use Moo::Role;
 
 But if that is all you are doing then you're just using PluginKit as
 a tool to apply roles at run-time.  That's cool and all, but PluginKit
@@ -131,13 +131,13 @@ can do so much more.
 
 Let's include another plugin in this plugin:
 
-  use MooX::PluginKit::Plugin;
-  plugin_includes 'MyApp::Plugin::Foo::Bar';
+    use MooX::PluginKit::Plugin;
+    plugin_includes 'MyApp::Plugin::Foo::Bar';
 
 We could also write that using a relative (to the including plugin)
 plugin name:
 
-  plugin_includes '::Bar';
+    plugin_includes '::Bar';
 
 C<plugin_includes> takes a list, so you may include multiple plugins.
 Gnarly, we can package together plugins!  Yes, you could get the
@@ -149,7 +149,7 @@ the contextual nature of PluginKit plugins as described next.
 Take everything you learned so far and throw this awesome bomb
 at it:
 
-  plugin_applies_to 'MyApp::SomeClass';
+    plugin_applies_to 'MyApp::SomeClass';
 
 Did you hear the mic drop?  Maybe not, so let me explain it for ya.  You
 can create groups of plugins (even groups of groups of groups of plugins)
@@ -185,14 +185,14 @@ simple as pie.
 To make your class accept a C<plugins> argument it goes something like this
 (well, actually, exactly like this):
 
-  package MyApp;
-  use Moo;
-  use MooX::PluginKit::Consumer;
+    package MyApp;
+    use Moo;
+    use MooX::PluginKit::Consumer;
 
 This class now supports the C<plugins> argument when calling C<new()>, like
 so:
 
-  my $app = MyApp->new( plugins=>[...] );
+    my $app = MyApp->new( plugins=>[...] );
 
 =head2 Object Attributes
 
@@ -200,19 +200,19 @@ But, there is more!  Your objects often refer to other objects, right?  Those
 other objects shouldn't be left out of the plugin goodness, so open up your
 arms and hug them in!
 
-  has_pluggable_object foo => (
-    class => 'MyApp::Foo',
-  );
+    has_pluggable_object foo => (
+        class => 'MyApp::Foo',
+    );
 
 C<has_pluggable_object> takes many of the same arguments as L<Moo/has>.  When setup like
 above, rather than passing an object as the argument you'd pass a hashref which will be
 automatically coerced into an object with all relevant plugins applied.  If you'd like
 to default the object you can with something like this:
 
-  has_pluggable_object foo => (
-    class   => 'MyApp::Foo',
-    default => sub{ {} },
-  );
+    has_pluggable_object foo => (
+        class     => 'MyApp::Foo',
+        default => sub{ {} },
+    );
 
 See more at L<MooX::PluginKit::Consumer/has_pluggable_object>.
 
@@ -224,7 +224,7 @@ if your class is C<MyApp> and the user wants to apply the C<::Foo> plugin then
 that will resolve to the C<MyApp::Foo> plugin.  Unlike many things in life, you
 can change this:
 
-  plugin_namespace 'MyApp::Plugin';
+    plugin_namespace 'MyApp::Plugin';
 
 Now if the user specified C<::Foo> as a plugin it would resolve to
 C<MyApp::Plugin::Foo>.
