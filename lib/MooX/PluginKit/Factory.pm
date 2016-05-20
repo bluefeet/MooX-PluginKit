@@ -18,7 +18,7 @@ MooX::PluginKit::Factory - Dynamically apply plugins to classes at runtime.
 =head1 DESCRIPTION
 
 A PluginKit factory takes a list of plugins and then provides methods
-for applying those plugins to classes and building objets from those classes.
+for applying those plugins to classes and building objects from those classes.
 
 Unless you are a power user you are better off using
 L<MooX::PluginKit::Consumer>.

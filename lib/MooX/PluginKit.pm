@@ -36,7 +36,7 @@ Plugins may include other plugins.
 =back
 
 This means that you can make groups of plugins which apply to various
-classes in a hiearchy.
+classes in a hierarchy.
 
 =head1 IN THE REAL WORLD
 
@@ -55,7 +55,7 @@ context class, the request class, and the response class all require
 separate directives manually entered in by the end-user of Catalyst.
 Its really a lot of mess when a feature is implemented by, for example,
 both a request and response plugin.  If you forget one, the whole thing
-breaks.  Here's a fake example of how things currenty look:
+breaks.  Here's a fake example of how things currently look:
 
   use Catalyst (
     SomeContextPlugin
@@ -134,7 +134,7 @@ can do so much more.
 
 =head2 Bundling
 
-Lets include another plugin in this plugin:
+Let's include another plugin in this plugin:
 
   use MooX::PluginKit::Plugin;
   plugin_includes 'MyApp::Plugin::Foo::Bar';
@@ -158,16 +158,16 @@ at it:
 
 Did you hear the mic drop?  Maybe not, so let me explain it for ya.  You
 can create groups of plugins (even groups of groups of groups of plugins)
-and each plugin, at any level, can declare what kinds of classses it (and its
+and each plugin, at any level, can declare what kinds of classes it (and its
 included plugins) applies to.  This means you can tell your end-user "use
-plugin X" and behind the scenese they could potentially be using dozens of
+plugin X" and behind the scenes they could potentially be using dozens of
 plugins applied dynamically to dozens of classes.  This makes something that is
 normally hard and complex for the end-user something that only the plugin
 author needs to deal with and can tightly control.
 
 Is it a good idea to write a dozen plugins and apply them to a dozen classes?
 Probably not!  Would it be fun to write a dozen plugins and dynamically apply
-them to a dozen classes at run time withou the user's knowledge?  Heck ya!
+them to a dozen classes at run time without the user's knowledge?  Heck ya!
 
 Note that when you specify the C<plugin_applies_to> you can provide a package
 name, a regex, an array ref of method names (aka duck type), or a custom subroutine
@@ -211,7 +211,7 @@ arms and hug them in!
 
 C<has_pluggable_object> takes many of the same arguments as L<Moo/has>.  When setup like
 above, rather than passing an object as the argument you'd pass a hashref which will be
-automatically coerced into an object with all relavent plugins applied.  If you'd like
+automatically coerced into an object with all relevant plugins applied.  If you'd like
 to default the object you can with something like this:
 
   has_pluggable_object foo => (

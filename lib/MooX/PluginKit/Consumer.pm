@@ -70,7 +70,7 @@ sub import {
 
 When the L<MooX::PluginKit::ConsumerRole/plugins> argument is set
 the user may choose to pass relative plugins.  Setting this namespace
-changes the default root namespae used to resolve these relative
+changes the default root namespace used to resolve these relative
 plugin names to absolute ones.
 
 This defaults to the package name of the class which uses this module.
