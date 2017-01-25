@@ -26,10 +26,10 @@ sub new {
     return bless {}, $class;
 }
 
-sub BUILDARGS {
-    my $class = shift;
-    return Moo::Object->BUILDARGS( @_ );
-}
+sub BUILDARGS { Moo::Object::BUILDARGS(@_) }
+sub NORMALIZE_BUILDARGS { Moo::Object::NORMALIZE_BUILDARGS(@_) }
+sub TRANSFORM_BUILDARGS { Moo::Object::TRANSFORM_BUILDARGS(@_) }
+sub FINALIZE_BUILDARGS { Moo::Object::FINALIZE_BUILDARGS(@_) }
 
 1;
 __END__

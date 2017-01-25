@@ -27,10 +27,8 @@ around BUILDARGS => sub{
     my $class = shift;
     my $args = $class->$orig( @_ );
 
-    return $args if !exists $args->{plugins};
-
     my $factory = MooX::PluginKit::Factory->new(
-        plugins   => delete( $args->{plugins} ),
+        plugins   => delete( $args->{plugins} ) || [],
         namespace => get_consumer_namespace( $class ),
     );
 

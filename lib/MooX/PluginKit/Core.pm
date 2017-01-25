@@ -49,7 +49,7 @@ my %consumers; # Metadata about classes.
 
 sub init_plugin {
     my ($plugin_name) = @_;
-    my $plugin = $plugins{$plugin_name} = {};
+    $plugins{$plugin_name} = {};
     return;
 }
 
@@ -77,7 +77,7 @@ sub resolve_plugin {
 
     return $plugin_name if exists $plugins{$plugin_name};
 
-    # Got ahead and shortcircuit here as Moo::Role does not add inlined packages into
+    # Go ahead and shortcircuit here as Moo::Role does not add inlined packages into
     # %INC so the require_module() call could fail in some cases if the module has already
     # been setup but isn't on the filesystem in the expected locations.
     return $plugin_name if Moo::Role->is_role( $plugin_name );
@@ -86,8 +86,6 @@ sub resolve_plugin {
 
     croak "Plugin $plugin_name does not appear to be a Moo::Role"
         if !Moo::Role->is_role( $plugin_name );
-
-    $plugins{$plugin_name} = {};
 
     return $plugin_name;
 }

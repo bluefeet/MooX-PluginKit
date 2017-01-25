@@ -28,6 +28,7 @@ L<MooX::PluginKit::Consumer>.
 use MooX::PluginKit::Core;
 use Types::Standard -types;
 use Types::Common::String -types;
+use Module::Runtime qw( require_module );
 
 use Moo;
 use strictures 2;
@@ -115,6 +116,7 @@ sub class_new {
     my $base_class = shift;
 
     my $class = $self->build_class( $base_class );
+    require_module $class if !$class->can('new');
     my $args = $class->BUILDARGS( @_ );
 
     if (is_consumer $class) {

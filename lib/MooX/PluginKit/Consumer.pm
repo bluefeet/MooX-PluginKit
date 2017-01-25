@@ -39,6 +39,7 @@ be found at L<MooX::PluginKit/CONSUMING PLUGINS>.
 use MooX::PluginKit::Core;
 use MooX::PluginKit::ConsumerRole;
 use Types::Standard -types;
+use Class::Method::Modifiers qw( install_modifier );
 use Scalar::Util qw( blessed );
 use Carp qw( croak );
 use Exporter qw();
@@ -101,7 +102,16 @@ the C<foo_bar> argument as a hashref.  This hashref will be used to
 create an object of the C<Foo::Bar> class, but not until after any
 applicable plugins set on the consumer class have been applied to it.
 
-This function only support a subset of the arguments that L<Moo/has>
+Documented below are the L<Moo/has> argument which are supported as well
+as several custom arguments (like C<class>, above).
+
+Note that you MUST set either L</class>, L<class_arg>, or L<class_builder>.
+
+Read more about this at L<MooX::PluginKit/Object Attributes>.
+
+=head3 Moo Arguments
+
+This function only supports a subset of the arguments that L<Moo/has>
 supports.  They are:
 
     handles
@@ -111,28 +121,93 @@ supports.  They are:
     weak_ref
     init_arg
 
-Any other arguments will be ignored.
+=head3 class
 
-Read more about this at L<MooX::PluginKit/Object Attributes>.
+Setting this to a class name does two things, 1) it declares the C<isa> on
+the attributes to validate that the final value is an instance of the class
+or a subclass of it, and 2) defaults the L</class_builder> to always return
+this class.
+
+=head3 class_arg
+
+If the class to be instantiated can be derived from the hashref argument to
+this attribute then set this to the name of the key in the hashref to get the
+class from.  Setting this to a C<1> is the same as setting it to C<class>.  So,
+these are the same:
+
+    has_pluggable_object foo => ( class_arg=>1 );
+    has_pluggable_object foo => ( class_arg=>'class' );
+
+Then when passing the hashref the class can be declared as part of it:
+
+    my $thing = YourClass->new( foo=>{ class=>'Foo::Stuff', ... } );
+
+=head3 class_builder
+
+Set this to a method name or a code ref which will be used to build the
+class name.  This sub will be called as a method and passed the args hashref
+and is expected to return a class name.
+
+If this is set to C<1> then the method name will be automatically generated
+based on the attribute name.  So, these are identical:
+
+    has_pluggable_object foo => ( class_builder=>1 );
+    has_pluggable_object foo => ( class_builder=>'_foo_build_class' );
+
+Then make the sub:
+
+    sub _foo_build_class { my ($self, $args) = @_; ...; return $class }
+
+=head3 class_namespace
+
+Set this to allow the class to be relative.  This way if the class starts with
+C<::> then this namespace will be automatically prefixed to it.
+
+=head3 args_builder
+
+Set this to a method name or a code ref which will be used to adjust the
+hashref arguments before the object is constructed from them.  This sub will
+be called as a method and passed the args hashref and is epxected to return
+an args hashref.
+
+If this is set to C<1> then the method name will be automatically generated
+based on the attribute name.  So, these are identical:
+
+    has_pluggable_object foo => ( args_builder=>1 );
+    has_pluggable_object foo => ( args_builder=>'_foo_build_args' );
+
+Then make the sub:
+
+    sub _foo_build_args { my ($self, $args) = @_; ...; return $args }
 
 =cut
 
 sub has_pluggable_object {
-    my ($attr_name, %args) = @_;
+    my ($name, %args) = @_;
     my $consumer_class = (caller())[0];
+    local $Carp::Internal{ (__PACKAGE__) } = 1;
 
     my $has = get_consumer_moo_has( $consumer_class );
 
-    my $object_class = delete $args{class};
-    my $isa = InstanceOf[ $object_class ];
+    my $class_builder = _normalize_class_builder( $name, $consumer_class, %args );
+    my $args_builder = _normalize_args_builder( $name, $consumer_class, %args );
 
-    my $init_name = "_init_$attr_name";
+    my $isa = delete $args{isa};
+    my $class = delete $args{class};
+
+    if (!defined $isa) {
+        $isa = InstanceOf[ $class ] if defined $class;
+        $isa ||= Object;
+    }
+
+    my $init_name = "_init_$name";
+    my $init_isa = $isa | HashRef;
 
     $has->(
-    $init_name,
-        init_arg => $attr_name,
+        $init_name,
+        init_arg => $name,
         is       => 'ro',
-        isa      => $isa | HashRef,
+        isa      => $init_isa,
         lazy     => 1,
         (
             map { $_ => $args{$_} }
@@ -145,7 +220,7 @@ sub has_pluggable_object {
     $attr_isa = $attr_isa | Undef if !$args{required};
 
     $has->(
-        $attr_name,
+        $name,
         init_arg => undef,
         is       => 'lazy',
         isa      => $attr_isa,
@@ -154,19 +229,120 @@ sub has_pluggable_object {
             grep { exists $args{$_} }
             qw( handles weak_ref )
         ),
-        builder => sub{
-            my ($self) = @_;
-
-            my $args = $self->$init_name();
-            return $args if ref($args) ne 'HASH';
-
-            return $self->class_new_with_plugins(
-                $object_class, $args,
-            );
-        },
+        builder => _build_attr_builder(
+            $init_name, $args_builder, $class_builder,
+        ),
     );
 
     return;
+}
+
+# Avoid circular references by making this anonymous sub into a separate closure.
+sub _build_attr_builder {
+    my ($init_name, $args_builder, $class_builder) = @_;
+
+    return sub{
+        my ($self) = @_;
+
+        my $args = $self->$init_name();
+        return $args if ref($args) ne 'HASH';
+        $args = $self->$args_builder( $args ) if defined $args_builder;
+
+        my $class = $self->$class_builder( $args );
+
+        return $self->class_new_with_plugins(
+            $class, $args,
+        );
+    };
+}
+
+sub _normalize_class_builder {
+    my ($name, $consumer_class, %args) = @_;
+
+    my $class = delete $args{class};
+    my $class_arg = delete $args{class_arg};
+    my $class_builder = delete $args{class_builder};
+    my $class_namespace = delete $args{class_namespace};
+
+    $class_arg = undef if defined($class_arg) and "$class_arg" eq '0';
+    $class_builder = undef if defined($class_builder) and "$class_builder" eq '0';
+
+    croak 'Both class_arg and class_builder cannot be set at the same time'
+        if defined($class_arg) and defined($class_builder);
+
+    $class_arg = 'class' if defined($class_arg) and "$class_arg" eq '1';
+
+    my $class_builder_sub;
+
+    if (defined $class_arg) {
+        $class_builder = sub{ $_[1]->{$class_arg} };
+    }
+
+    if (ref($class_builder) eq 'CODE') {
+        $class_builder_sub = $class_builder;
+        $class_builder = 1;
+    }
+
+    if (defined($class) and !defined($class_builder)) {
+        $class_builder_sub = sub{ $class };
+        $class_builder = 1;
+    }
+
+    if (defined($class_builder) and "$class_builder" eq '1') {
+        $class_builder = $name . '_build_class';
+        $class_builder = '_' . $class_builder if $class_builder !~ m{^_};
+    }
+
+    if ($class_builder_sub) {
+        install_modifier(
+            $consumer_class, 'fresh',
+            $class_builder => $class_builder_sub,
+        );
+    }
+
+    if (defined $class_namespace) {
+        install_modifier(
+            $consumer_class, 'around',
+            $class_builder => sub{
+                my $orig = shift;
+                my $self = shift;
+                my $class = $self->$orig( @_ );
+                $class = $class_namespace . $class if $class =~ m{^::};
+                return $class;
+            },
+        );
+    }
+
+    return $class_builder;
+}
+
+sub _normalize_args_builder {
+    my ($name, $consumer_class, %args) = @_;
+
+    my $args_builder = delete $args{args_builder};
+
+    $args_builder = undef if defined($args_builder) and "$args_builder" eq '0';
+
+    my $args_builder_sub;
+
+    if (ref($args_builder) eq 'CODE') {
+        $args_builder_sub = $args_builder;
+        $args_builder = 1;
+    }
+
+    if (defined($args_builder) and "$args_builder" eq '1') {
+        $args_builder = $name . '_build_args';
+        $args_builder = '_' . $args_builder if $args_builder !~ m{^_};
+    }
+
+    if ($args_builder_sub) {
+        install_modifier(
+            $consumer_class, 'fresh',
+            $args_builder => $args_builder_sub,
+        );
+    }
+
+    return $args_builder;
 }
 
 1;
