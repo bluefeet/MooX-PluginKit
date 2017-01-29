@@ -2,6 +2,12 @@ Revision history for Perl extension MooX::PluginKit.
 
 {{$NEXT}}
 
+ - Added default_class to has_pluggable_object.
+ - The limitation of not being able to use class_arg and class_builder in
+   has_pluggable_object has been removed.
+ - Added has_pluggable_class.
+ - Update the main documentation to be less fanciful and more useful.
+
 0.02 2017-01-24
 
  - Add ways to dynamically determine the base class in has_pluggable_object.

@@ -39,7 +39,9 @@ be found at L<MooX::PluginKit/CONSUMING PLUGINS>.
 use MooX::PluginKit::Core;
 use MooX::PluginKit::ConsumerRole;
 use Types::Standard -types;
+use Types::Common::String -types;
 use Class::Method::Modifiers qw( install_modifier );
+use Module::Runtime qw( require_module );
 use Scalar::Util qw( blessed );
 use Carp qw( croak );
 use Exporter qw();
@@ -50,6 +52,7 @@ use namespace::clean;
 our @EXPORT = qw(
     plugin_namespace
     has_pluggable_object
+    has_pluggable_class
 );
 
 sub import {
@@ -260,31 +263,24 @@ sub _normalize_class_builder {
     my ($name, $consumer_class, %args) = @_;
 
     my $class = delete $args{class};
+    my $default_class = delete $args{default_class};
     my $class_arg = delete $args{class_arg};
     my $class_builder = delete $args{class_builder};
     my $class_namespace = delete $args{class_namespace};
 
+    $default_class = $class if !defined $default_class;
     $class_arg = undef if defined($class_arg) and "$class_arg" eq '0';
     $class_builder = undef if defined($class_builder) and "$class_builder" eq '0';
-
-    croak 'Both class_arg and class_builder cannot be set at the same time'
-        if defined($class_arg) and defined($class_builder);
 
     $class_arg = 'class' if defined($class_arg) and "$class_arg" eq '1';
 
     my $class_builder_sub;
-
-    if (defined $class_arg) {
-        $class_builder = sub{ $_[1]->{$class_arg} };
-    }
-
     if (ref($class_builder) eq 'CODE') {
         $class_builder_sub = $class_builder;
         $class_builder = 1;
     }
-
-    if (defined($class) and !defined($class_builder)) {
-        $class_builder_sub = sub{ $class };
+    elsif (!defined $class_builder) {
+        $class_builder_sub = sub{ undef };
         $class_builder = 1;
     }
 
@@ -300,18 +296,20 @@ sub _normalize_class_builder {
         );
     }
 
-    if (defined $class_namespace) {
-        install_modifier(
-            $consumer_class, 'around',
-            $class_builder => sub{
-                my $orig = shift;
-                my $self = shift;
-                my $class = $self->$orig( @_ );
-                $class = $class_namespace . $class if $class =~ m{^::};
-                return $class;
-            },
-        );
-    }
+    install_modifier(
+        $consumer_class, 'around',
+        $class_builder => sub{
+            my ($orig, $self, $args) = @_;
+
+            my $class = defined($class_arg) ? $args->{$class_arg} : undef;
+            $class = $self->$orig( $args ) if !defined $class;
+            $class = $default_class if !defined $class;
+            return undef if !defined $class;
+
+            $class = $class_namespace . $class if $class =~ m{^::};
+            return $class;
+        },
+    );
 
     return $class_builder;
 }
@@ -343,6 +341,58 @@ sub _normalize_args_builder {
     }
 
     return $args_builder;
+}
+
+sub has_pluggable_class {
+    my ($name, %args) = @_;
+    my $consumer_class = (caller())[0];
+    local $Carp::Internal{ (__PACKAGE__) } = 1;
+
+    my $has = get_consumer_moo_has( $consumer_class );
+
+    my $init_name = "_init_$name";
+
+    $has->(
+        $init_name,
+        init_arg => $name,
+        is       => 'ro',
+        isa      => NonEmptySimpleStr,
+        lazy     => 1,
+        (
+            map { $_ => $args{$_} }
+            grep { exists $args{$_} }
+            qw( default builder required init_arg )
+        ),
+    );
+
+    my $isa = $args{isa} || ClassName;
+    $isa = $isa | Undef if !$args{required};
+
+    $has->(
+        $name,
+        init_arg => undef,
+        is       => 'lazy',
+        isa      => $isa,
+        builder => _build_class_attr_builder(
+            $init_name,
+        ),
+    );
+
+    return;
+}
+
+sub _build_class_attr_builder {
+    my ($init_name) = @_;
+
+    return sub{
+        my ($self) = @_;
+
+        my $class = $self->$init_name();
+
+        require_module $class if !$class->can('new');
+
+        return $self->plugin_factory->build_class( $class );
+    };
 }
 
 1;
