@@ -133,8 +133,8 @@ sub set_plugin_applies_to {
         if exists $plugin->{applies_to};
 
     if (!ref $sub) {
-        my $class = $sub;
-        $sub = sub{ $_[0] eq $class };
+        my $package = $sub;
+        $sub = sub{ $_[0]->isa( $package ) or $_[0]->DOES( $package ) };
     }
     elsif (ref($sub) eq 'ARRAY') {
         my $methods = $sub;

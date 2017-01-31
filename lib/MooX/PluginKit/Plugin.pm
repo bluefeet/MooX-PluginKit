@@ -41,8 +41,10 @@ sub import {
 
 =head2 plugin_applies_to
 
-    # Only apply to classes which isa() the supplied class.
+    # Only apply to classes which isa() the supplied class, or
+    # DOES() the supplied role.
     plugin_applies_to 'Some::Class';
+    plugin_applies_to 'Some::Role';
     
     # Only apply to classes which match the regex.
     plugin_applies_to qr/^MyApp::Foo::/;

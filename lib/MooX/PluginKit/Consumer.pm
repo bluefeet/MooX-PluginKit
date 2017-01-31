@@ -117,19 +117,33 @@ Read more about this at L<MooX::PluginKit/Object Attributes>.
 This function only supports a subset of the arguments that L<Moo/has>
 supports.  They are:
 
-    handles
-    default
     builder
+    default
+    handles
+    init_arg
+    isa
     required
     weak_ref
-    init_arg
 
 =head3 class
 
 Setting this to a class name does two things, 1) it declares the C<isa> on
 the attributes to validate that the final value is an instance of the class
-or a subclass of it, and 2) defaults the L</class_builder> to always return
-this class.
+or a subclass of it, and 2) sets L</default_class> to it.
+
+=head3 default_class
+
+If no class is specified this will be the default class used.  A common idiom
+of using both L</class> and this is:
+
+    has_pluggable_object foo => (
+        class         => 'Foo',
+        default_class => 'Foo::SubClass',
+    );
+
+Meaning, in the above example, that the final object may be any subclass of the
+C<Foo> class, but if no class is specified, it will be constructed from the
+C<Foo::SubClass> class.
 
 =head3 class_arg
 
@@ -160,6 +174,9 @@ based on the attribute name.  So, these are identical:
 Then make the sub:
 
     sub _foo_build_class { my ($self, $args) = @_; ...; return $class }
+
+Note that the class builder will not be called if L</class_arg> if set and
+the user has specified a class argument.
 
 =head3 class_namespace
 
@@ -249,7 +266,7 @@ sub _build_attr_builder {
 
         my $args = $self->$init_name();
         return $args if ref($args) ne 'HASH';
-        $args = $self->$args_builder( $args ) if defined $args_builder;
+        $args = $self->$args_builder({ %$args }) if defined $args_builder;
 
         my $class = $self->$class_builder( $args );
 
@@ -342,6 +359,31 @@ sub _normalize_args_builder {
 
     return $args_builder;
 }
+
+=head2 has_pluggable_class
+
+    has_pluggable_class foo_bar_class => (
+        default => 'Foo::Bar',
+    );
+
+This function acts like L<Moo/has> but adds a bunch of functionality,
+making it easy to refer to a class that gets plugins applied to it
+at run-time.
+
+In the above C<foo_bar_class> example, the user of your class can then specify
+the C<foo_bar_class> argument, if they wish, and the class they pass in will
+have any relevant plugins applied to it.
+
+This function only supports a subset of the arguments that L<Moo/has>
+supports.  They are:
+
+    builder
+    default
+    init_arg
+    isa
+    required
+
+=cut
 
 sub has_pluggable_class {
     my ($name, %args) = @_;

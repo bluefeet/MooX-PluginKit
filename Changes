@@ -7,6 +7,8 @@ Revision history for Perl extension MooX::PluginKit.
    has_pluggable_object has been removed.
  - Added has_pluggable_class.
  - Update the main documentation to be less fanciful and more useful.
+ - Fix a potential memory leak.
+ - Support roles in plugin_applies_to.
 
 0.02 2017-01-24
 
