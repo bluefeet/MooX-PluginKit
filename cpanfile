@@ -6,6 +6,7 @@ requires 'Module::Runtime'  => 0.014;
 requires 'Carp'             => 0;
 requires 'Exporter'         => 0;
 requires 'Scalar::Util'     => 0;
+requires 'Class::Method::Modifiers' => 0;
 
 on test => sub {
    requires 'Test::Simple' => 0.96;
