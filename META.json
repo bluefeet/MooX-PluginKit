@@ -45,16 +45,16 @@
             "Carp" : "0",
             "Exporter" : "0",
             "Module::Runtime" : "0.014",
-            "Moo" : "2",
+            "Moo" : "2.000000",
             "Scalar::Util" : "0",
             "Type::Tiny" : "1.000005",
             "namespace::clean" : "0.24",
-            "strictures" : "2"
+            "strictures" : "2.000000"
          }
       },
       "test" : {
          "requires" : {
-            "Test::Simple" : "0.96"
+            "Test2::V0" : "0.000094"
          }
       }
    },
