@@ -1,6 +1,8 @@
-Revision history for Perl extension MooX::PluginKit.
+Revision history for Perl extension MooX-PluginKit.
 
 {{$NEXT}}
+
+ - Migrate build tooling from Dist::Zilla to Minilla.
 
 0.03 2017-01-30
 

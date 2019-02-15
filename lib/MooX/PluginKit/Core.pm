@@ -1,5 +1,7 @@
 package MooX::PluginKit::Core;
 
+$MooX::PluginKit::Core::VERSION = '0.03';
+
 =head1 NAME
 
 MooX::PluginKit::Core - The PluginKit internal guts.
