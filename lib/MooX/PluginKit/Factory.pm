@@ -1,6 +1,6 @@
 package MooX::PluginKit::Factory;
 
-$MooX::PluginKit::Factory::VERSION = '0.03';
+$MooX::PluginKit::Factory::VERSION = '0.04';
 
 =head1 NAME
 
