@@ -1,6 +1,6 @@
 package MooX::PluginKit::Core;
 
-$MooX::PluginKit::Core::VERSION = '0.04';
+our $VERSION = '0.04';
 
 =head1 NAME
 
