@@ -2,6 +2,7 @@ Revision history for Perl extension MooX-PluginKit.
 
 {{$NEXT}}
 
+ - Fix missing DOES under perl 5.8 by using UNIVERSAL::DOES.
  - Require perl 5.8 per Manilla.
  - Simplify VERSION declarations.
 

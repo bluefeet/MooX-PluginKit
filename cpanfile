@@ -8,6 +8,7 @@ requires 'Module::Runtime' => '0.014';
 requires 'Carp';
 requires 'Exporter';
 requires 'Scalar::Util';
+requires 'UNIVERSAL::DOES';
 
 on test => sub {
     requires 'Test2::V0' => '0.000094';
