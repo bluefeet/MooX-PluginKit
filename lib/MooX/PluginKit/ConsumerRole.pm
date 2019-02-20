@@ -1,5 +1,6 @@
 package MooX::PluginKit::ConsumerRole;
-
+use 5.008001;
+use strictures 2;
 our $VERSION = '0.05';
 
 =head1 NAME
@@ -21,7 +22,6 @@ use MooX::PluginKit::Factory;
 use Types::Standard -types;
 
 use Moo::Role;
-use strictures 2;
 use namespace::clean;
 
 around BUILDARGS => sub{

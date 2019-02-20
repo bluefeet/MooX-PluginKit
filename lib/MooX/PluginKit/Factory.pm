@@ -1,5 +1,6 @@
 package MooX::PluginKit::Factory;
-
+use 5.008001;
+use strictures 2;
 our $VERSION = '0.05';
 
 =head1 NAME
@@ -33,7 +34,6 @@ use Types::Common::String -types;
 use Module::Runtime qw( require_module );
 
 use Moo;
-use strictures 2;
 use namespace::clean;
 
 =head1 ARGUMENTS

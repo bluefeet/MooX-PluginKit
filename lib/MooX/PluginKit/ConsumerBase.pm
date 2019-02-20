@@ -1,5 +1,6 @@
 package MooX::PluginKit::ConsumerBase;
-
+use 5.008001;
+use strictures 2;
 our $VERSION = '0.05';
 
 =head1 NAME
@@ -15,7 +16,6 @@ L<MooX::PluginKit/Cleanly Alter Constructor>.
 
 use Moo::Object qw();
 
-use strictures 2;
 use namespace::clean;
 
 sub new {

@@ -1,5 +1,6 @@
 package MooX::PluginKit::Plugin;
-
+use 5.008001;
+use strictures 2;
 our $VERSION = '0.05';
 
 =head1 NAME
@@ -22,7 +23,6 @@ use MooX::PluginKit::Core;
 use Carp qw();
 use Exporter qw();
 
-use strictures 2;
 use namespace::clean;
 
 our @EXPORT = qw(

@@ -1,5 +1,5 @@
 package MooX::PluginKit;
-
+use 5.008001;
 our $VERSION = '0.05';
 
 # I don't do anything.
