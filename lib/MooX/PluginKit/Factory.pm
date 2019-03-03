@@ -133,5 +133,7 @@ __END__
 
 =head1 AUTHORS AND LICENSE
 
-See L<MooX::PluginKit/AUTHOR> and L<MooX::PluginKit/LICENSE>.
+See L<MooX::PluginKit/AUTHORS> and L<MooX::PluginKit/LICENSE>.
+
+=cut
 

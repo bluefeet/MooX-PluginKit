@@ -43,11 +43,15 @@
       "runtime" : {
          "requires" : {
             "Carp" : "0",
+            "Class::Method::Modifiers" : "2.00",
             "Exporter" : "0",
             "Module::Runtime" : "0.014",
             "Moo" : "2.000000",
+            "Moo::Object" : "0",
+            "Moo::Role" : "2.000000",
             "Scalar::Util" : "0",
-            "Type::Tiny" : "1.000005",
+            "Types::Common::String" : "1.000005",
+            "Types::Standard" : "1.000005",
             "UNIVERSAL::DOES" : "0",
             "namespace::clean" : "0.24",
             "perl" : "5.008001",
