@@ -1,7 +1,7 @@
 package MooX::PluginKit;
 use 5.008001;
 use strictures 2;
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 # I don't do anything.
 
